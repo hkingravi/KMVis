@@ -1,0 +1,66 @@
+# this script tests the Orthogonal Matching Pursuit algorithm
+import numpy as np
+from scipy.io import loadmat, savemat
+import matplotlib.pyplot as plt
+from matplotlib import rc
+from mpl_toolkits.mplot3d import Axes3D
+
+from time import time
+from KernelRidgeRegression import *
+from kernel import *
+from KernelType import *
+
+# load data, and use matplotlib to plot it
+mat_file = loadmat('KRR_test.mat',squeeze_me=False)
+data = mat_file['x']
+obs = mat_file['y_n']
+
+k_name   = "gaussian"
+k_params = np.array( [0.5] )
+k = KernelType(k_name,k_params)
+
+print data.shape
+print obs.shape
+
+start = time()
+krr1 = KernelRidgeRegression(k, 0)
+krr2 = KernelRidgeRegression(k, 0.2)
+krr1.process(data,obs)
+krr2.process(data,obs)
+
+est_obs1 = krr1.reduce(data)
+est_obs2 = krr2.reduce(data)
+
+# clean up
+est_obs1 = np.squeeze(np.asarray(est_obs1))
+est_obs2 = np.squeeze(np.asarray(est_obs2))
+
+# plot fits
+#data = np.mat(data)
+#obs = np.mat(obs)
+
+print type(data.shape)
+print obs.shape
+print type(est_obs1.shape)
+print est_obs2.shape
+
+# turns on Tex
+rc('text', usetex=True)
+rc('font', family='serif')
+
+fig = plt.figure()
+ax = fig.gca()
+p1, = ax.plot(data[0,:],obs[0,:],'ro')
+p2, = ax.plot(data[0,:],est_obs1,'b', linewidth=2.5)
+ax.set_title(r"Kernel Regression",fontsize=20)
+plt.legend([p1, p2], ["data", "non-regularized"])
+
+fig2 = plt.figure()
+ax2 = fig2.gca()
+p1, = ax2.plot(data[0,:],obs[0,:],'ro')
+p3, = ax2.plot(data[0,:],est_obs2,'g', linewidth=2.5)
+ax2.set_title(r"Kernel Ridge Regression",fontsize=20)
+plt.legend([p1, p3], ["data", "regularized"])
+
+plt.draw()
+plt.show()

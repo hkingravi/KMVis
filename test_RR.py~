@@ -1,0 +1,52 @@
+# this script tests the Orthogonal Matching Pursuit algorithm
+import numpy as np
+from scipy.io import loadmat, savemat
+import matplotlib.pyplot as plt
+from matplotlib import rc
+from mpl_toolkits.mplot3d import Axes3D
+
+from time import time
+from RidgeRegression import *
+
+# load data, and use matplotlib to plot it
+mat_file = loadmat('RR_test.mat',squeeze_me=False)
+data = mat_file['x']
+obs = mat_file['y']
+
+start = time()
+rr1 = RidgeRegression(0)
+rr2 = RidgeRegression(1)
+rr1.process(data,obs)
+rr2.process(data,obs)
+
+est_obs1 = rr1.reduce(data)
+est_obs2 = rr2.reduce(data)
+
+print data.shape
+print obs.shape
+print est_obs1.shape
+print est_obs2.shape
+
+# plot fits
+
+rc('text', usetex=True)
+rc('font', family='serif')
+
+
+fig = plt.figure()
+ax = fig.gca()
+p1, = ax.plot(data[:,1],obs[:,0],'ro')
+p2, = ax.plot(data[:,1],est_obs1[:,0],'b')
+ax.set_title(r"Linear Regression",fontsize=20)
+plt.legend([p1, p2], ["data", "non-regularized"])
+
+fig2 = plt.figure()
+ax2 = fig2.gca()
+p1, = ax2.plot(data[:,1],obs[:,0],'ro')
+p3, = ax2.plot(data[:,1],est_obs2[:,0],'g')
+ax2.set_title(r"Ridge Regression",fontsize=20)
+plt.legend([p1, p3], ["data", "non-regularized"])
+
+
+plt.draw()
+plt.show()
