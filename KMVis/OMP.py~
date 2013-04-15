@@ -4,7 +4,24 @@ from scipy import isscalar
 # import scipy
 class OMP:
     """
-    Implements a class performing Orthogonal Matching Pursuit. 
+    Implements a class performing Orthogonal Matching Pursuit. OMP is just one algorithm 
+    for basis pursuit, which attempts to find a solution to the sparse recovery problem 
+
+    .. math::
+
+       \\begin{align}
+       \min \|x\|_1 \\text{ s.t. } \Phi x = y, 
+       \\end{align}
+
+    where :math:`\Phi\in\mathbb{R}^{m\\times n}` is the dictionary, :math:`y\in\mathbb{R}^{m}`
+    is the vector of observations, and :math:`x\in\mathbb{R}^{n}` is the 'state' vector, which
+    is assumed to be sparse. Typically, :math:`m \ll n`, i.e. the number of observations are much
+    smaller than the elements in the dictionary; due to this property, the matrix is underdetermined,
+    and the sparsity requirement functions as a prior that enables the state's recovery. 
+
+    For a theoretical analysis and outline of the algorithm, see 
+    `Signal Recovery From Random Measurements Via Orthogonal Matching Pursuit. 
+    <http://authors.library.caltech.edu/9490/1/TROieeetit07.pdf>`_ by Tropp and Gilbert.
  
     Example usage::
 
