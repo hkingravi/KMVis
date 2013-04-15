@@ -22,6 +22,8 @@ from kernel import *
 from KernelType import *
 from KPCA import *
 
+np.set_printoptions(precision=4)
+
 k_name1   = "gaussian"
 k_name2   = "sigmoid"
 k_name3   = "polynomial"
@@ -72,7 +74,8 @@ print "\nData dimensionality: ", data.shape
 # run KPCA, and compute eigenmbedding of data
 start = time()
 neigs = 3 
-kpca_obj = KPCA(k1,neigs)
+centered = 1
+kpca_obj = KPCA(k1, neigs, centered)
 kpca_obj.process(data)
 coeff = kpca_obj.reduce(data)
 elapsed = (time() - start)
@@ -116,7 +119,7 @@ polydata = hstack([polydata1,polydata2])
 print "\nData dimensionality: ", polydata.shape
 start = time()
 neigs = 3 
-kpca_obj2 = KPCA(k3,neigs)
+kpca_obj2 = KPCA(k3, neigs, centered)
 kpca_obj2.process(polydata)
 polycoeff1 = kpca_obj2.reduce(polydata1)
 polycoeff2 = kpca_obj2.reduce(polydata2)
@@ -201,19 +204,19 @@ ax5 = fig5.gca(projection='3d')
 #CS = plt.contour(X, Y, Z0, linewidths=2)
 CS = ax5.plot_surface(X,Y,Z0,cmap=cm.jet)
 plt.clabel(CS, inline=1, fontsize=10)
-plt.title(r"Gaussian KPCA Eigenfunction 1",fontsize=20)
+plt.title(r"Gaussian KPCA Eigenfunction 1 (Centered)",fontsize=20)
 
 fig6 = plt.figure()
 ax6 = fig6.gca(projection='3d')
 CS1 = ax6.plot_surface(X,Y,Z1,cmap=cm.jet)
 plt.clabel(CS1, inline=1, fontsize=10)
-plt.title(r"Gaussian KPCA Eigenfunction 2",fontsize=20)
+plt.title(r"Gaussian KPCA Eigenfunction 2 (Centered)",fontsize=20)
 
 fig7 = plt.figure()
 ax7 = fig7.gca(projection='3d')
 CS2 = ax7.plot_surface(X,Y,Z2,cmap=cm.jet)
 plt.clabel(CS2, inline=1, fontsize=10)
-plt.title(r"Gaussian KPCA Eigenfunction 3",fontsize=20)
+plt.title(r"Gaussian KPCA Eigenfunction 3 (Centered)",fontsize=20)
 
 
 # POLYNOMIAL
@@ -222,19 +225,19 @@ ax8 = fig8.gca(projection='3d')
 #CS = plt.contour(X, Y, Z0, linewidths=2)
 poly_CS = ax8.plot_surface(poly_X,poly_Y,poly_Z0,cmap=cm.jet)
 plt.clabel(poly_CS, inline=1, fontsize=10)
-plt.title(r"Polynomial KPCA Eigenfunction 1",fontsize=20)
+plt.title(r"Polynomial KPCA Eigenfunction 1 (Centered)",fontsize=20)
 
 fig9 = plt.figure()
 ax9 = fig9.gca(projection='3d')
 poly_CS1 = ax9.plot_surface(poly_X,poly_Y,poly_Z1,cmap=cm.jet)
 plt.clabel(poly_CS1, inline=1, fontsize=10)
-plt.title(r"Polynomial KPCA Eigenfunction 2",fontsize=20)
+plt.title(r"Polynomial KPCA Eigenfunction 2 (Centered)",fontsize=20)
 
 fig10 = plt.figure()
 ax10 = fig10.gca(projection='3d')
 poly_CS2 = ax10.plot_surface(poly_X,poly_Y,poly_Z2,cmap=cm.jet)
 plt.clabel(poly_CS2, inline=1, fontsize=10)
-plt.title(r"Polynomial KPCA Eigenfunction 3",fontsize=20)
+plt.title(r"Polynomial KPCA Eigenfunction 3 (Centered)",fontsize=20)
 
 
 plt.draw()

@@ -4,11 +4,7 @@ from kernel import kernel
 # import scipy
 class DiffMap:
     """
-    Implements a class for diffusion maps. Good references include: 
-
-    - `Geometric diffusions as a tool for harmonic analysis and structure definition of data: Diffusion maps <http://www.pnas.org/content/102/21/7426.long>`_ by Coifman et al.
-
-    - `Diffusion maps <http://knight.cis.temple.edu/~latecki/Courses/RobotFall08/Papers/DiffusionMaps06.pdf>`_ by Coifman and Lafon.
+    Implements a class for diffusion maps. 
  
     Example usage::
 
