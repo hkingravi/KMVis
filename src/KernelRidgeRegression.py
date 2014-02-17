@@ -53,7 +53,7 @@ class KernelRidgeRegression:
         :type phi_mat: numpy array
         :param obs_vec: Observation vector :math:`y\in\mathbb{R}^{n}`
         :type obs_vec: numpy array
-        :return: `alpha`: estimated state vector :math:\\alpha\in\mathbb{R}^{d}`
+        :return: `alpha`: estimated state vector :math:`\\alpha\in\mathbb{R}^{d}`
         :rtype:  numpy array
         """        
         # check consistency of data

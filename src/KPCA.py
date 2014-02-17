@@ -13,16 +13,16 @@ class KPCA:
         data = np.transpose(mat_file['data'])
  
         # set up kernel  
-        k_name = "sigmoid"
-        k_params = array( [0.5, 1.2] ) # numpy array
-        k = KernelType(k_name, k_params)        
+        k_name   = "gaussian"
+        k_params = np.array( [1.2] )
+        k = KernelType(k_name,k_params)        
 
         # run kpca 
         neigs = 3 
         centered = 0
         kpca_obj = KPCA(k, neigs, centered)
         kpca_obj.process(data) # generate eigenspace
-        coeff = kpca_obj.reduce(data) # project data onto eigenspace
+        coeff = kpca_obj.project(data) # project data onto eigenspace
 
     :param k_type: Kernel type
     :type k_type: KernelType
@@ -108,7 +108,7 @@ class KPCA:
 	self.alpha = alpha # store copies of coefficients and data
 	self.data = data
 
-    def reduce(self, tdata):
+    def project(self, tdata):
         """
         This function builds the kernel matrix from the data, and the test data,
         and projects the test data onto the KPCA eigenspace. 

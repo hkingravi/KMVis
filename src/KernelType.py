@@ -11,6 +11,10 @@ class KernelType:
       where :math:`\ x,y,\in\mathbb{R}^d`, and :math:`\\alpha, c\in\mathbb{R}`. 
     * gaussian - :math:`k(x,y):= \exp{\left(\\frac{\|x-y\|^2}{2\sigma^2}\\right)}`,
       where :math:`\ x,y,\in\mathbb{R}^d`, and :math:`\\sigma\in\mathbb{R}_+`. 
+    * laplacian - :math:`k(x,y):= \exp{\left(\\frac{\|x-y\|}{\sigma}\\right)}`,
+      where :math:`\ x,y,\in\mathbb{R}^d`, and :math:`\\sigma\in\mathbb{R}_+`. 
+    * cauchy - :math:`k(x,y):= \\frac{1}{1 + \\frac{\|x-y\|^2}{\sigma^2}}`,
+      where :math:`\ x,y,\in\mathbb{R}^d`, and :math:`\\sigma\in\mathbb{R}_+`. 
 
     Example usage:: 
 
@@ -33,25 +37,35 @@ class KernelType:
                 self.name   = k_name
                 self.params = k_params 
             else: 
-                print "Wrong number of parameters: polynomial\
-                       kernel needs degree and bias\n"
+                raise Exception("Incorrect number of parameters: polynomial kernel needs degree and bias")
         elif k_name == "gaussian":
             k_size = k_params.shape
             if k_size[0] == 1:
                 self.name   = k_name
                 self.params = k_params 
             else: 
-                print "Wrong number of parameters: gaussian\
-                       kernel needs bandwidth\n"      
+                raise Exception("Incorrect number of parameters: gaussian kernel needs bandwidth")
         elif k_name == "sigmoid": 
             k_size = k_params.shape
             if k_size[0] == 2:
                 self.name   = k_name
                 self.params = k_params 
             else: 
-                print "Wrong number of parameters: sigmoid\
-                       kernel needs bandwidth\n"            
+                raise Exception("Incorrect number of parameters: sigmoid kernel needs bandwidth")
+        elif k_name == "laplacian":
+            k_size = k_params.shape
+            if k_size[0] == 1:
+                self.name   = k_name
+                self.params = k_params 
+            else: 
+                raise Exception("Incorrect number of parameters: laplacian kernel needs bandwidth")
+        elif k_name == "cauchy":
+            k_size = k_params.shape
+            if k_size[0] == 1:
+                self.name   = k_name
+                self.params = k_params 
+            else: 
+                raise Exception("Incorrect number of parameters: cauchy kernel needs bandwidth")
         else:
-            print "Invalid kernel type: supported types are\
-                    polynomial, gaussian, sigmoid\n"
+            raise Exception("Invalid kernel type: supported types are polynomial, gaussian, laplacian, cauchy, sigmoid\n")
 

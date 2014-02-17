@@ -1,0 +1,15 @@
+    """
+    Given an integer k, generate an array of k RGB colors, 
+    ranging in hue from 0 (minimum) to 1 (maximum). This is
+    useful for adaptive plotting. 
+
+    Example usage::
+
+        # create array of 20 colors
+        colorarray = gencolorarray(20)
+
+    :param numcolors: integer representing number of colors desired
+    :type numcolors: int
+    :return: colorlist: a list of RGB colors
+    :rtype:  list
+    """

@@ -78,7 +78,7 @@ class DiffMap:
 	self.alpha = alpha # store copies of coefficients and data
 	self.data = data
 
-    def reduce(self, tdata):
+    def project(self, tdata):
         """
         This function uses the Nystrom extension to projects the test data onto 
         the diffusion space. 

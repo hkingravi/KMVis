@@ -1,4 +1,4 @@
-from numpy import shape, mat, kron, exp, zeros, ones, tanh, dot, power, hstack, power
+from numpy import shape, mat, kron, exp, zeros, ones, tanh, dot, power, hstack, power, sqrt
 from scipy import isscalar
 def kernel(data1, data2, k_type):
     """
@@ -72,7 +72,8 @@ def kernel(data1, data2, k_type):
                 bias_mat = bias*bias_mat
                 k_mat = d_vals + bias_mat
             
-        elif k_name == "gaussian":
+        elif k_name == "gaussian" or k_name == "laplacian" or k_name == "cauchy":
+            # all of these kernels have a bandwidth: first compute radial distance
             sigma = k_params[0]
 
             d_vals = mat(dot(data1.T, data2))
@@ -84,8 +85,17 @@ def kernel(data1, data2, k_type):
 
             k_mat = val1 + val2 - 2*d_vals
 
-            s_val = -1.0/(2*pow(sigma, 2)) # compute scaling          
-            k_mat = exp(s_val*k_mat)
+            # now apply to each kernel 
+            if k_name == "gaussian":
+              s_val = -1.0/(2*pow(sigma, 2)) # compute scaling          
+              k_mat = exp(s_val*k_mat)
+            elif k_name == "laplacian":
+              k_mat = sqrt(k_mat)
+              k_mat = exp(-k_mat/sigma)
+            elif k_name == "cauchy":
+              one_mat = ones(k_mat.shape)
+              k_mat = one_mat/(one_mat + k_mat/(pow(sigma, 2)))
+
         elif k_name == "sigmoid":
             alpha = k_params[0]
             bias = k_params[1]
@@ -95,8 +105,8 @@ def kernel(data1, data2, k_type):
  
             k_mat = tanh(d_vals + c_vals)
         else:
-            print "Error: Invalid kernel type"
+            raise Exception("Invalid kernel type")
     else: 
-        print "Error: data1 and data2 matrix dimensions do not match: see documentation"
+        raise Exception("Dimensions of data1 and data2 must be the same")
 
     return k_mat
