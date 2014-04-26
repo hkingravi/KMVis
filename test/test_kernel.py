@@ -1,85 +1,85 @@
-# this script tests KernelType and kernel 
+# unit testing for kernel module
+import unittest
+from scipy.io import loadmat
+from numpy import array, arange
+from numpy.testing import assert_array_equal
+# import modules
+import sys, os
+path1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/exceptions'))
+path2 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/core'))
+path3 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
 
-# numpy stuff
-import numpy as np
-from scipy.io import loadmat, savemat
+if not path1 in sys.path:
+    sys.path.insert(1, path1)
+if not path2 in sys.path:
+    sys.path.insert(1, path2)
+if not path3 in sys.path:
+    sys.path.insert(1, path3)
 
-# matplotlib stuff
-import matplotlib as mp
-from matplotlib import rc
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+del path1
+del path2
+del path3
 
-# add class directory to path
-import sys
-sys.path.insert(0, '../KMVis')
+from KernelType import KernelType
+from kernel import kernel
 
-# our imports 
-from kernel import *
-from KernelType import *
+class KernelTestCase(unittest.TestCase):
+    """Tests for `kernel.py`."""
+    def test_kernel_numeric(self):
+        k_name1   = "gaussian"
+        k_name2   = "sigmoid"
+        k_name3   = "polynomial"
+        k_name4   = "laplacian"
+        k_name5   = "cauchy"
+        k_name6   = "periodic"
+        k_name7   = "locally_periodic"
+        k_params1 = array( [1.2] )
+        k_params2 = array( [0.5, 1.2] )
+        k_params3 = array( [2, 0] )
+        k_params4 = array( [1.2] )
+        k_params5 = array( [1.2] )
+        k_params6 = array( [1.2, 0.5] )
+        k_params7 = array( [0.5, 1] )
 
-k_name1   = "gaussian"
-k_name2   = "sigmoid"
-k_name3   = "polynomial"
-k_name4   = "wrongname"
-k_params1 = np.array( [1.2] )
-k_params2 = np.array( [0.5, 1.2] )
-k_params3 = np.array( [2, 0] )
+        k1 = KernelType(k_name1,k_params1)
+        k2 = KernelType(k_name2,k_params2)
+        k3 = KernelType(k_name3,k_params3)
+        k4 = KernelType(k_name4,k_params4)
+        k5 = KernelType(k_name5,k_params5)
+        k6 = KernelType(k_name6,k_params6)
+        k7 = KernelType(k_name7,k_params7)
 
-k1 = KernelType(k_name1,k_params1)
-k2 = KernelType(k_name2,k_params2)
-k3 = KernelType(k_name3,k_params3)
-k4 = KernelType(k_name4,k_params3)
+        # compute kernels on data
+        x = arange(-5,5,0.1)
+        x_rad = arange(-3,7,0.1)
+        y = array([2]) # y vals
 
+        k_gauss_t = kernel(x_rad,y,k1)
+        k_sigm_t = kernel(x,y,k2)
+        k_poly_t = kernel(x,y,k3)
+        k_lap_t = kernel(x_rad,y,k4)
+        k_cauchy_t = kernel(x_rad,y,k5)
+        k_periodic_t = kernel(x_rad,y,k6)
+        k_locally_periodic_t = kernel(x_rad,y,k7)
 
-# check names etc
-print "Kernel 1:"
-print "Name: "  + k1.name
-print "Parms: " 
-print  k1.params
+        # load data to compare
+        mat_file = loadmat('test_kernel',squeeze_me=False)
+        k_gauss = mat_file['k_gauss']
+        k_sigm = mat_file['k_sigm']
+        k_poly = mat_file['k_poly']
+        k_lap = mat_file['k_lap']
+        k_cauchy = mat_file['k_cauchy']
+        k_periodic = mat_file['k_periodic']
+        k_locally_periodic = mat_file['k_locally_periodic']
 
-print "\nKernel 2:"
-print "Name: "  + k2.name
-print "Parms: " 
-print  k2.params
+        # make sure these are all equal
+        self.assertIsNone(assert_array_equal(k_gauss,k_gauss_t))
+        self.assertIsNone(assert_array_equal(k_sigm,k_sigm_t))
+        self.assertIsNone(assert_array_equal(k_poly,k_poly_t))
+        self.assertIsNone(assert_array_equal(k_lap,k_lap_t))
+        self.assertIsNone(assert_array_equal(k_cauchy,k_cauchy_t))
+        self.assertIsNone(assert_array_equal(k_periodic,k_periodic_t))
+        self.assertIsNone(assert_array_equal(k_locally_periodic,k_locally_periodic_t))
 
-print "\nKernel 3:"
-print "Name: "  + k3.name
-print "Parms: " 
-print  k3.params
-
-# now, generate plots for kernels 
-x = np.arange(-5,5,0.1)
-y = np.array([2]) # y vals
-
-k_gauss = kernel(x,y,k1)
-k_sigm = kernel(x,y,k2)
-k_poly = kernel(x,y,k3)
-
-# plot Gaussian kernel values
-
-# turns on Tex
-rc('text', usetex=True)
-rc('font', family='serif')
-
-fig = plt.figure()
-ax = fig.gca()
-ax.plot(x,k_gauss,'b', linewidth=2.5)
-ax.set_title(r"Gaussian kernel with $\sigma = 1.2$",fontsize=20)
-
-fig2 = plt.figure()
-ax2 = fig2.gca()
-ax2.plot(x,k_sigm,'b', linewidth=2.5)
-ax2.set_title(r"Sigmoid kernel with $\alpha = 0.5, c = 1.2$",fontsize=20)
-
-fig3 = plt.figure()
-ax3 = fig3.gca()
-ax3.plot(x,k_poly,'b', linewidth=2.5)
-ax3.set_title(r"Polynomial kernel with $\gamma = 2, c = 0$",fontsize=20)
-
-plt.draw()
-plt.show()
-
-
-
-
+if __name__ == '__main__':
+    unittest.main()

@@ -11,64 +11,98 @@ import matplotlib.pyplot as plt
 
 # add class directory to path
 import sys
-sys.path.insert(0, '../src/core')
-sys.path.insert(0, '../data/examples')
+# from test.softmax_cost import softmax_grad, softmax_cost
+sys.path.insert(0, '../src')
+sys.path.insert(0, '../data')
 
 # our imports
 from KernelType import *
-from computeNumericalGradient import *
+# from computeNumericalGradient import *
 from scipy.optimize import fmin_l_bfgs_b
 from softmax_train import *
 from softmax_cost import *
 from SoftMax import *
+import time
 
-
-data = np.array([[2, 3, 4],[3, 5, 6]])
-labels = np.array([1, 1, 9])
-#cost_vals = sm.cost(data, labels)
+#==============================================================================
+## [Test softmax cost]
 
 # load data for test
-mat_file = loadmat('softmax_debug_test.mat',squeeze_me=False)
-data = mat_file['inputData']
-labels = mat_file['labels2']
-theta = mat_file['theta']
-
-print data.shape
-print labels.shape
-
-nclasses = 10
-dim = data.shape[0]
-wdecay = 0.0001
-
-# need to flatten theta for input
-theta = theta.flatten(1)
-
-print theta
-
-# compute cost
-cost = softmax_cost(theta, nclasses, dim, wdecay, data, labels)
-thetagrad = softmax_grad(theta, nclasses, dim, wdecay, data, labels)
-
-print cost
-print thetagrad
-
-# after this test is passed, we move to the actual softmax training
-mat_file = loadmat('mnist_images_softmax.mat',squeeze_me=False)
+mat_file = loadmat('../softmax_debug_test.mat',squeeze_me=False)
 data = mat_file['inputData']
 labels = mat_file['labels']
+theta=mat_file['theta']
+lambda_=mat_file['lambda']
 
+
+# -----------------------------------------------------------------------------
+## Unit test of softmax_cost and softmax_grad, compared to the MATLABT version
+cost=softmax_cost(theta, 10, 8, lambda_, data, labels)
+grad=softmax_grad(theta, 10, 8, lambda_, data, labels)
+thetagrad = reshape(grad,(8,10)) # Do this
+thetagrad= thetagrad.T
+plt.plot(thetagrad)
+plt.draw()
+
+
+
+#===============================================================================
+## [Release Test -- training]
+
+# after this test is passed, we move to the actual softmax training
+print "[mnist images example]"
+mat_file = loadmat('../softmax_release_test.mat',squeeze_me=False)
+data = mat_file['inputData']
+labels = mat_file['labels']
+theta=mat_file['theta']
+wdecay=mat_file['lambda']
+nclasses = 10
 dim = data.shape[0]
+
+print "=========================\n input Parms"
+print "inputData"
+print data.shape
+print "labels: "
+print labels.shape
+print "dim:"
+print dim
+print "nclasses:"
+print nclasses
+print "========================="
+
+
 sm = SoftMax(dim, nclasses, wdecay)
-sm.train(data, labels)
-
-#res = fmin_l_bfgs_b(softmax_cost, theta, fprime=softmax_grad,
-#              args=(nclasses, dim, wdecay, data, labels), approx_grad=False, bounds=None)
+optTheta=sm.train(data, labels, 100) # max iteration 100
 
 
-#softmax_train(dim, nclasses, wdecay, data, labels)
+#===============================================================================
+## [Release Test -- testing]
 
-#print cost_vals[0]
-#print cost_vals[1]
+## load optTheta
+mat_file = loadmat('../softmax_release_test_TestingPhase.mat',squeeze_me=False)
+# optTheta=mat_file['optTheta']
+testingData=mat_file['inputData']
+testingLabels=mat_file['labels']
+testingLabels=testingLabels-1  # ! convert to zero-indexing
+
+nclasses = 10
+dim = testingData.shape[0]
+
+print "=========================\n input Parms"
+print "testingData"
+print testingData.shape
+print "testing labels: "
+print testingLabels.shape
+print "dim:"
+print dim
+print "nclasses:"
+print nclasses
+print "========================="
+
+pred=softmax_predict(optTheta, nclasses, dim, testingData)
+
+
+
 
 
 

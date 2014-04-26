@@ -1,61 +1,61 @@
-# this script tests the MeanMap class  
+import unittest
+from scipy.io import loadmat
+from numpy import array
+from numpy.testing import assert_array_equal
+# import modules
+import sys, os
+path1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/exceptions'))
+path2 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/core'))
+path3 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
+path4 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/examples'))
 
-# numpy stuff
-import numpy as np
-from scipy.io import loadmat, savemat
+if not path1 in sys.path:
+    sys.path.insert(1, path1)
+if not path2 in sys.path:
+    sys.path.insert(1, path2)
+if not path3 in sys.path:
+    sys.path.insert(1, path3)
+if not path4 in sys.path:
+    sys.path.insert(1, path4)
 
-# matplotlib stuff
-import matplotlib as mp
-from matplotlib import rc
-import matplotlib.pyplot as plt
+del path1
+del path2
+del path3
+del path4
 
-# add class directory to path
-import sys
-sys.path.insert(0, '../src')
-sys.path.insert(0, '../data')
+from KernelType import KernelType
+from MeanMap import MeanMap
 
-# our imports 
-from KernelType import *
-from MeanMap import *
+class MMDTestCase(unittest.TestCase):
+    """Tests for `MMD.py`."""
+    def test_mmd(self):
+        # load data for training
+        mat_file = loadmat('mmd_data.mat',squeeze_me=False)
+        data1 = mat_file['data1'] # data from distribution 1
+        data2 = mat_file['data2'] # data from distribution 1
+        data3 = mat_file['data3'] # data from distribution 2
 
-# turns on Tex for plotting
-rc('text', usetex=True)
-rc('font', family='serif')
+        # set up kernel
+        k_name = "gaussian"
+        k_params = array( [3] ) # numpy array
+        k = KernelType(k_name, k_params)
 
-# load data
-mat_file = loadmat('mmd_data.mat',squeeze_me=False) # load data, and use matplotlib to plot it
-data1 = mat_file['data1'] # data from distribution 1
-data2 = mat_file['data2'] # data from distribution 1
-data3 = mat_file['data3'] # data from distribution 2
+        # initialize MeanMap
+        mm_obj = MeanMap(k)
+        mm_obj.process(data1) # build map
 
-# plot original data 
-fig = plt.figure()
-ax = fig.gca()
-p1, = ax.plot(data1[0,:],data1[1,:],'ro')
-p2, = ax.plot(data2[0,:],data2[1,:],'bo')
-p3, = ax.plot(data3[0,:],data3[1,:],'go')
-plt.legend([p1, p2, p3], ["samples from $p_1(x)$", "samples from $p_2(x)$","samples from $p_1(x)$"])
-ax.set_title(r"Samples from Two Probability Distributions",fontsize=20)
+        # compute maximum mean discrepancy between data1 and data2
+        dist1_t = mm_obj.mmd(data2)
+        dist2_t = mm_obj.mmd(data3)
 
-# set up kernel  
-k_name = "gaussian"
-k_params = np.array( [3] ) # numpy array
-k = KernelType(k_name, k_params)        
+        # load data to compare
+        mat_file = loadmat('test_mmd',squeeze_me=False)
+        dist1 = mat_file['dist1']
+        dist2 = mat_file['dist2']
 
-# initialize MeanMap
-mm_obj = MeanMap(k)
-mm_obj.process(data1) # build map
+        # make sure these are all equal
+        self.assertIsNone(assert_array_equal(dist1, dist1_t))
+        self.assertIsNone(assert_array_equal(dist2, dist2_t))
 
-dist1 = mm_obj.mmd(data2) 
-dist2 = mm_obj.mmd(data3)
-
-# compute maximum mean discrepancy between data1 and data2
-print "The MMD between data1 and data2 is " + str(dist1)
-print "The MMD between data1 and data3 is " + str(dist2)
-
-plt.draw()
-plt.show()
-
-
-
-
+if __name__ == '__main__':
+    unittest.main()

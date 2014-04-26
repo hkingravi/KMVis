@@ -1,96 +1,82 @@
-# test SMO
+# unit testing for KernelSVM module
+import unittest
+from scipy.io import loadmat
+from numpy import array, random, hstack
+from numpy.testing import assert_array_equal
+# import modules
+import sys, os
+path1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/exceptions'))
+path2 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/core'))
+path3 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
+path4 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/examples'))
 
-# numpy stuff
-import numpy as np
-from scipy.io import loadmat, savemat
+if not path1 in sys.path:
+    sys.path.insert(1, path1)
+if not path2 in sys.path:
+    sys.path.insert(1, path2)
+if not path3 in sys.path:
+    sys.path.insert(1, path3)
+if not path4 in sys.path:
+    sys.path.insert(1, path4)
 
-# matplotlib stuff
-from matplotlib import rc
-import matplotlib.pyplot as plt
+del path1
+del path2
+del path3
+del path4
 
+from KernelType import KernelType
+from kernel import kernel
+from KernelSVM import KernelSVM
 
-# add class directory to path
-from time import time
-import sys
-sys.path.insert(0, '../src')
+class KernelSVMTestCase(unittest.TestCase):
+    """Tests for `KernelSVM.py`."""
+    def test_kernel_svm(self):
 
-# our imports 
-from kernel import *
-from KernelType import *
-from KernelSVM import *
+        # set random seed to ensure reproducible pseudorandom behavior
+        random.seed(3)
 
-# load data, and use matplotlib to plot it
-data_file = loadmat('../data/kernel_trick_data.mat',squeeze_me=False)
-classes_file = loadmat('../data/kernel_trick_classes.mat',squeeze_me=False)
+        # load data for training
+        data_file = loadmat('kernel_trick_data.mat',squeeze_me=False)
+        classes_file = loadmat('kernel_trick_classes.mat',squeeze_me=False)
 
-data1 = data_file['x1']
-data2 = data_file['x2']
-labels1 = classes_file['c1']
-labels2 = classes_file['c2']
+        data1 = data_file['x1']
+        data2 = data_file['x2']
+        labels1 = classes_file['c1']
+        labels2 = classes_file['c2']
 
+        # initialize kernel
+        k_name   = "gaussian"
+        k_params = array( [2] )
+        k = KernelType(k_name,k_params)
 
-#data1 = np.array([[-2, -1],[-2,-1]])
-#data2 = np.array([[2, 1],[2,1]])
-#labels1 = -1*np.ones((1,2))
-#labels2 = np.ones((1,2))
+        # initialize parameters
+        C = 100
+        tol = 0.001
+        max_its = 100
 
-# initialize kernel
-k_name   = "gaussian"
-k_params = np.array( [2] )
-#k_name   = "sigmoid"
-#k_params = np.array( [1,0.1] )
-k = KernelType(k_name,k_params)
+        # initialize SVM object
+        ksvm = KernelSVM(k,C,tol,max_its)
 
-# initialize parameters 
-C = 100
-tol = 0.001
-max_its = 100
+        # prepare, and pass in data
+        data = hstack([data1,data2])
+        labels = hstack([labels1,labels2])
+        ksvm.process(data,labels)
 
-# initialize SVM object
-start = time()
-ksvm = KernelSVM(k,C,tol,max_its)
+        predicted_labels_t = ksvm.predict(data)
+        xv_t, yv_t, vals_t = ksvm.evaluateboundary(data,100,100)
 
-# prepare, and pass in data
-data = np.hstack([data1,data2])
-labels = np.hstack([labels1,labels2])
-ksvm.process(data,labels)
-elapsed = (time() - start)
-print "Gaussian SVM training time:", elapsed, "seconds"
+        # load data to compare
+        mat_file = loadmat('test_ksvm',squeeze_me=False)
+        predicted_labels = mat_file['predicted_labels']
+        xv = mat_file['xv']
+        yv = mat_file['yv']
+        vals = mat_file['vals']
 
-# call SMO 
-#alpha, b = simplesmo(data,classes,k,C,tol,max_its)
+        # make sure these are all equal
+        self.assertIsNone(assert_array_equal(predicted_labels, predicted_labels_t))
+        self.assertIsNone(assert_array_equal(xv, xv_t))
+        self.assertIsNone(assert_array_equal(yv, yv_t))
+        self.assertIsNone(assert_array_equal(vals, vals_t))
 
-# compute accuracy
-ntest = data.shape[1]
-predicted_labels = ksvm.predict(data)
-diff = np.absolute(labels - predicted_labels)
-err = np.sum(diff)/(2*ntest)
-print "Gaussian SVM training error:", err
-
-# compute boundary 
-start = time()
-xv, yv, vals = ksvm.evaluateboundary(data,100,100)
-elapsed = (time() - start)
-print "Boundary evaluation time:", elapsed, "seconds"
-
-# plot original data and boundary contour
-fig = plt.figure()
-ax = fig.gca()
-ax.plot(data1[0,:],data1[1,:],'bo')
-ax.plot(data2[0,:],data2[1,:],'ro')
-ax.contour(xv,yv,vals, np.array([0, 0])) # plot countour at middle 
-ax.set_title(r"Nonlinearly separable data",fontsize=20)
-
-
-plt.draw()
-plt.show()
-
-
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    unittest.main()
