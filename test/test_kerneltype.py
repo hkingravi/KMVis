@@ -4,14 +4,13 @@ from numpy import array
 
 # import modules
 import sys, os
-path1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/exceptions'))
-path2 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/core'))
-if not path1 in sys.path:
-    sys.path.insert(1, path1)
-if not path2 in sys.path:
-    sys.path.insert(1, path2)
-del path1
-del path2
+exception_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/exceptions'))
+core_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/core'))
+
+if not exception_path in sys.path:
+    sys.path.insert(1, exception_path)
+if not core_path in sys.path:
+    sys.path.insert(1, core_path)
 
 from Error import KernelParametersError
 from Error import KernelTypeError

@@ -1,38 +1,27 @@
 # unit testing for KPCA module
 import unittest
-#from random import random, seed
+# from random import random, seed
 from scipy.io import loadmat
 from numpy import array, asarray, squeeze, transpose, nonzero, hstack
-from numpy.testing import assert_array_equal
+from numpy.linalg import norm
+
 # import modules
 import sys, os
-path1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/exceptions'))
-path2 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/core'))
-path3 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
-path4 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/examples'))
 
-if not path1 in sys.path:
-    sys.path.insert(1, path1)
-if not path2 in sys.path:
-    sys.path.insert(1, path2)
-if not path3 in sys.path:
-    sys.path.insert(1, path3)
-if not path4 in sys.path:
-    sys.path.insert(1, path4)
+# do imports 
+from ..src.core.KernelType import KernelType
+from ..src.core.kernel import kernel
+from ..src.core.KPCA import KPCA
 
-del path1
-del path2
-del path3
-del path4
-
-# our imports
-from kernel import kernel
-from KernelType import KernelType
-from KPCA import KPCA
+from ..src.utils.genloadstring import genloadstring # for loading data 
+test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
+data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/examples'))
 
 class KPCATestCase(unittest.TestCase):
     """Tests for `BayesianRBF.py`."""
     def test_kpca(self):
+        tolerance = 1e-12 # accepted tolerance of difference 
+
         k_name1   = "gaussian"
         k_name2   = "cauchy"
         k_name3   = "polynomial"
@@ -46,7 +35,9 @@ class KPCATestCase(unittest.TestCase):
         k_poly = KernelType(k_name3, k_params3)
 
         # load GMM data
-        mat_file = loadmat('separable_gmm.mat', squeeze_me=False)
+        gmm_data_filename = 'separable_gmm'
+        gmm_data_filepath = genloadstring(data_path,gmm_data_filename)
+        mat_file = loadmat(gmm_data_filepath, squeeze_me=False)
         data = transpose(mat_file['data'])
         labels = mat_file['labels']
 
@@ -62,7 +53,9 @@ class KPCATestCase(unittest.TestCase):
         l4 = l4[0, :]
 
         # now load polynomial kernel data
-        mat_file = loadmat('kernel_trick_data.mat', squeeze_me=False)
+        kt_data_filename = 'kernel_trick_data'
+        kt_data_filepath = genloadstring(data_path,kt_data_filename)
+        mat_file = loadmat(kt_data_filepath, squeeze_me=False)
         polydata1 = mat_file['x1']
         polydata2 = mat_file['x2']
         polydata = hstack([polydata1, polydata2])
@@ -92,15 +85,22 @@ class KPCATestCase(unittest.TestCase):
         poly_proj_t = hstack([polyproj1, polyproj2])
 
         # now load solution to compare against
-        mat_file = loadmat('test_kpca', squeeze_me=False)
+        kpca_test_filename = 'test_kpca'
+        kpca_test_filepath = genloadstring(test_path,kpca_test_filename)
+        mat_file = loadmat(kpca_test_filepath, squeeze_me=False)
         cauchy_proj = mat_file['cauchy_proj']
         gauss_proj = mat_file['gauss_proj']
         poly_proj = mat_file['poly_proj']
 
+        # compute norm difference 
+        cauchy_diff = norm(cauchy_proj - cauchy_proj_t)
+        gauss_diff = norm(gauss_proj - gauss_proj_t)
+        poly_diff = norm(poly_proj - poly_proj_t)
+
         # make sure these matrices are equal
-        self.assertIsNone(assert_array_equal(cauchy_proj, cauchy_proj_t))
-        self.assertIsNone(assert_array_equal(gauss_proj, gauss_proj_t))
-        self.assertIsNone(assert_array_equal(poly_proj, poly_proj_t))
+        self.assertTrue(cauchy_diff < tolerance)
+        self.assertTrue(gauss_diff < tolerance)
+        self.assertTrue(poly_diff < tolerance)
 
 
 if __name__ == '__main__':

@@ -4,43 +4,34 @@ import unittest
 from scipy.io import loadmat
 from numpy.linalg import svd
 from numpy import array, dot, diag, asarray, zeros, random
-from numpy.testing import assert_array_equal
+from numpy.linalg import norm
+
 # import modules
 import sys, os
-path1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/exceptions'))
-path2 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/core'))
-path3 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
-path4 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/examples'))
 
-if not path1 in sys.path:
-    sys.path.insert(1, path1)
-if not path2 in sys.path:
-    sys.path.insert(1, path2)
-if not path3 in sys.path:
-    sys.path.insert(1, path3)
-if not path4 in sys.path:
-    sys.path.insert(1, path4)
+# do imports 
+from ..src.core.KernelType import KernelType
+from ..src.core.kernel import kernel
+from ..src.core.BayesianRBF import BayesianRBF
 
-del path1
-del path2
-del path3
-del path4
-
-# our imports
-from BayesianRBF import BayesianRBF
-from kernel import kernel
-from KernelType import KernelType
+from ..src.utils.genloadstring import genloadstring # for loading data 
+test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
+data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/examples'))
 
 class BayesianRBFTestCase(unittest.TestCase):
     """Tests for `BayesianRBF.py`."""
     def test_brbf(self):
+        tolerance = 1e-12 # accepted tolerance of difference 
+
         random.seed(3)
-        mat_file = loadmat('BRBF_test.mat',squeeze_me=False)
-        data = mat_file['data']
-        obs = mat_file['cvals']
-        centers = mat_file['centers']
-        eval_data = mat_file['eval_data']
-        evals = mat_file['evals']
+        brbf_data_filename = 'BRBF_test.mat'
+        brbf_data_filepath = genloadstring(data_path,brbf_data_filename)
+        brbf_mat_file = loadmat(brbf_data_filepath,squeeze_me=False)
+        data = brbf_mat_file['data']
+        obs = brbf_mat_file['cvals']
+        centers = brbf_mat_file['centers']
+        eval_data = brbf_mat_file['eval_data']
+        evals = brbf_mat_file['evals']
 
         k_name   = "gaussian"
         k_params = array( [0.5] )
@@ -91,15 +82,21 @@ class BayesianRBFTestCase(unittest.TestCase):
         A_r3_t = dot(U_ret3,dot(S_ret3,V_ret3))
 
         # check against stored files
-        mat_file = loadmat('test_brbf',squeeze_me=False)
-        A_r1 = mat_file['A_r1']
-        A_r2 = mat_file['A_r2']
-        A_r3 = mat_file['A_r3']
+        brbf_test_filename = 'test_brbf.mat'
+        brbf_test_filepath = genloadstring(test_path,brbf_test_filename)
+        brbf_test_mat_file = loadmat(brbf_test_filepath,squeeze_me=False)
+        A_r1 = brbf_test_mat_file['A_r1']
+        A_r2 = brbf_test_mat_file['A_r2']
+        A_r3 = brbf_test_mat_file['A_r3']
+
+        A_r1_diff = norm(A_r1-A_r1_t)
+        A_r2_diff = norm(A_r2-A_r2_t)
+        A_r3_diff = norm(A_r3-A_r3_t)
 
         # make sure these matrices are equal
-        self.assertIsNone(assert_array_equal(A_r1,A_r1_t))
-        self.assertIsNone(assert_array_equal(A_r2,A_r2_t))
-        self.assertIsNone(assert_array_equal(A_r3,A_r3_t))
+        self.assertTrue(A_r1_diff < tolerance)
+        self.assertTrue(A_r2_diff < tolerance)
+        self.assertTrue(A_r3_diff < tolerance)
 
 if __name__ == '__main__':
     unittest.main()

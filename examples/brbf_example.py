@@ -11,19 +11,20 @@ from matplotlib import rc
 import matplotlib.pyplot as plt
 
 # add class and data directories to path
-import sys
-sys.path.insert(0, '../src/core')
-sys.path.insert(0, '../data/examples')
+import sys, os 
 
-# our imports
-from BayesianRBF import BayesianRBF
-from kernel import kernel
-from KernelType import KernelType
-from gencolorarray import *
+from ..src.core.KernelType import KernelType
+from ..src.core.kernel import kernel
+from ..src.core.BayesianRBF import BayesianRBF
+
+from ..src.utils.genloadstring import genloadstring # for loading data 
+from ..src.utils.gencolorarray import gencolorarray # for coloring plot 
+test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
+data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/examples'))
 
 # boolean which tells program to save output so it
 # can be used by unit testing framework
-save_data = True;
+save_data = True
 
 # turns on Tex for plotting
 rc('text', usetex=True)
@@ -37,12 +38,14 @@ func_lwidth = 1.5
 basis_lwidth = 2.5
 
 # load data, and use matplotlib to plot it
-mat_file = loadmat('BRBF_test.mat',squeeze_me=False)
-data = mat_file['data']
-obs = mat_file['cvals']
-centers = mat_file['centers']
-eval_data = mat_file['eval_data']
-evals = mat_file['evals']
+brbf_data_filename = 'BRBF_test.mat'
+brbf_data_filepath = genloadstring(data_path,brbf_data_filename)
+brbf_mat_file = loadmat(brbf_data_filepath,squeeze_me=False)
+data = brbf_mat_file['data']
+obs = brbf_mat_file['cvals']
+centers = brbf_mat_file['centers']
+eval_data = brbf_mat_file['eval_data']
+evals = brbf_mat_file['evals']
 
 # first, plot the data
 fig = plt.figure()
@@ -107,7 +110,7 @@ A_r2 = np.dot(U_ret2,np.dot(S_ret2,V_ret2))
 A_r3 = np.dot(U_ret3,np.dot(S_ret3,V_ret3))
 
 if save_data:
-    savemat('../data/unit_tests/test_brbf.mat',
+    savemat(test_path + '/' + 'test_brbf.mat',
             {'A_r1':A_r1,'A_r2':A_r2,'A_r3':A_r3})
 
 # plot reconstructed signals for rank1

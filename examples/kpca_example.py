@@ -14,9 +14,10 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # add class directory to path
 from time import time
-import sys
+import sys, os
 sys.path.insert(0, '../src/core')
 sys.path.insert(0, '../data/examples')
+data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/examples'))
 
 # our imports
 from kernel import kernel
@@ -25,8 +26,7 @@ from KPCA import KPCA
 
 # boolean which tells program to save output so it
 # can be used by unit testing framework
-save_data = False;
-
+save_data = False 
 np.set_printoptions(precision=4)
 
 k_name1   = "gaussian"
@@ -43,7 +43,9 @@ k_poly = KernelType(k_name3,k_params3)
 
 
 # load data, and use matplotlib to plot it
-mat_file = loadmat('separable_gmm.mat',squeeze_me=False)
+gmm_data_filename = 'separable_gmm.mat'
+gmm_data_filepath = data_path + '/' + gmm_data_filename    
+mat_file = loadmat(gmm_data_filepath,squeeze_me=False)
 
 data = np.transpose(mat_file['data'])
 labels = mat_file['labels']
@@ -65,7 +67,6 @@ print "\nData dimensionality: ", data.shape
 start = time()
 neigs = 3
 centered = 0
-
 
 kpca_cauchy = KPCA(k_cauchy, neigs, centered)
 kpca_cauchy.process(data)
@@ -125,7 +126,9 @@ ax2.plot(coeff4[0,:], coeff4[1,:], coeff4[2,:], 'ko')
 ax2.set_title(r"Gaussian KPCA Embedding for GMM Data",fontsize=20)
 
 # now try polynomial kernel data
-mat_file = loadmat('kernel_trick_data.mat',squeeze_me=False)
+kt_data_filename = 'kernel_trick_data.mat'
+kt_data_filepath = data_path + '/' + kt_data_filename
+mat_file = loadmat(kt_data_filepath,squeeze_me=False)
 
 polydata1 = mat_file['x1']
 polydata2 = mat_file['x2']

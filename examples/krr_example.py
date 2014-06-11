@@ -11,22 +11,26 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 
 # add class directory to path
-import sys
-sys.path.insert(0, '../src/core')
-sys.path.insert(0, '../data/examples')
+import sys, os
 
 # our imports
 from time import time
-from KernelRidgeRegression import *
-from kernel import *
-from KernelType import *
+from ..src.core.KernelType import KernelType
+from ..src.core.kernel import kernel
+from ..src.core.KernelRidgeRegression import KernelRidgeRegression
+
+from ..src.utils.genloadstring import genloadstring # for loading data 
+test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
+data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/examples'))
 
 # boolean which tells program to save output so it
 # can be used by unit testing framework
-save_data = True;
+save_data = False
 
 # load data, and use matplotlib to plot it
-mat_file = loadmat('KRR_test.mat',squeeze_me=False)
+krr_data_filename = 'KRR_test.mat'
+krr_data_filepath = genloadstring(data_path,krr_data_filename)
+mat_file = loadmat(krr_data_filepath,squeeze_me=False)
 data = mat_file['x']
 obs = mat_file['y_n']
 
@@ -47,10 +51,6 @@ est_obs2 = krr2.predict(data)
 est_obs1 = np.squeeze(np.asarray(est_obs1))
 est_obs2 = np.squeeze(np.asarray(est_obs2))
 
-# plot fits
-#data = np.mat(data)
-#obs = np.mat(obs)
-
 # turns on Tex
 rc('text', usetex=True)
 rc('font', family='serif')
@@ -70,7 +70,7 @@ ax2.set_title(r"Kernel Ridge Regression",fontsize=20)
 plt.legend([p1, p3], ["data", "regularized"])
 
 if save_data:
-    savemat('../data/unit_tests/test_krr.mat',
+    savemat(test_path + '/' + 'test_krr.mat',
             {'est_obs1':est_obs1,'est_obs2':est_obs2})
 
 plt.draw()
