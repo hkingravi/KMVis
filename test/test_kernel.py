@@ -5,23 +5,23 @@ from numpy import array, arange
 from numpy.testing import assert_array_equal
 # import modules
 import sys, os
-path1 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/exceptions'))
-path2 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/core'))
-path3 = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
+exception_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/exceptions'))
+core_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/core'))
+utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/utils'))
+test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/unit_tests'))
 
-if not path1 in sys.path:
-    sys.path.insert(1, path1)
-if not path2 in sys.path:
-    sys.path.insert(1, path2)
-if not path3 in sys.path:
-    sys.path.insert(1, path3)
-
-del path1
-del path2
-del path3
+if not exception_path in sys.path:
+    sys.path.insert(1, exception_path)
+if not core_path in sys.path:
+    sys.path.insert(1, core_path)
+if not test_path in sys.path:
+    sys.path.insert(1, test_path)
+if not utils_path in sys.path:
+    sys.path.insert(1, utils_path)
 
 from KernelType import KernelType
 from kernel import kernel
+from genloadstring import genloadstring
 
 class KernelTestCase(unittest.TestCase):
     """Tests for `kernel.py`."""
@@ -63,7 +63,9 @@ class KernelTestCase(unittest.TestCase):
         k_locally_periodic_t = kernel(x_rad,y,k7)
 
         # load data to compare
-        mat_file = loadmat('test_kernel',squeeze_me=False)
+        test_filename = 'test_kernel' # have to reuse the path name; some bug in the path on Ubuntu 14.04
+        test_filepath = genloadstring(test_path,test_filename)
+        mat_file = loadmat(test_filepath,squeeze_me=False)
         k_gauss = mat_file['k_gauss']
         k_sigm = mat_file['k_sigm']
         k_poly = mat_file['k_poly']
