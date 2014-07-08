@@ -24,7 +24,7 @@ data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/exa
 
 # boolean which tells program to save output so it
 # can be used by unit testing framework
-save_data = True
+save_data = False
 
 # turns on Tex for plotting
 rc('text', usetex=True)
@@ -38,14 +38,14 @@ func_lwidth = 1.5
 basis_lwidth = 2.5
 
 # load data, and use matplotlib to plot it
-brbf_data_filename = 'BRBF_test.mat'
-brbf_data_filepath = genloadstring(data_path,brbf_data_filename)
-brbf_mat_file = loadmat(brbf_data_filepath,squeeze_me=False)
-data = brbf_mat_file['data']
-obs = brbf_mat_file['cvals']
-centers = brbf_mat_file['centers']
-eval_data = brbf_mat_file['eval_data']
-evals = brbf_mat_file['evals']
+gpregression_data_filename = 'gpregression_test.mat'
+gpregression_data_filepath = genloadstring(data_path,gpregression_data_filename)
+gpregression_mat_file = loadmat(gpregression_data_filepath,squeeze_me=False)
+data = gpregression_mat_file['data']
+obs = gpregression_mat_file['cvals']
+centers = gpregression_mat_file['centers']
+eval_data = gpregression_mat_file['eval_data']
+evals = gpregression_mat_file['evals']
 
 # first, plot the data
 fig = plt.figure()
